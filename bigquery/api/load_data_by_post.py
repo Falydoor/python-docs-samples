@@ -60,7 +60,8 @@ def make_post(http, schema, data, project_id, dataset_id, table_id):
                 '        "projectId": "' + project_id + '",\n' +
                 '        "datasetId": "' + dataset_id + '",\n' +
                 '        "tableId": "' + table_id + '"\n' +
-                '      }\n' +
+                '      },\n' +
+                '      "sourceFormat": "NEWLINE_DELIMITED_JSON"' +
                 '    }\n' +
                 '  }\n' +
                 '}\n' +
@@ -71,7 +72,7 @@ def make_post(http, schema, data, project_id, dataset_id, table_id):
     resource += data
 
     # Signify the end of the body
-    resource += ('--xxx--\n')
+    resource += ('\n--xxx--\n')
 
     headers = {'Content-Type': 'multipart/related; boundary=xxx'}
 
@@ -108,6 +109,8 @@ def poll_job(bigquery, job):
 # [START main]
 def main(project_id, dataset_id, table_name, schema_path, data_path):
     credentials = GoogleCredentials.get_application_default()
+    scope = ['https://www.googleapis.com/auth/bigquery']
+    credentials = credentials.create_scoped(scope)
     http = credentials.authorize(httplib2.Http())
     bigquery = discovery.build('bigquery', 'v2', credentials=credentials)
 
@@ -151,7 +154,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     main(
-        args.project_id,
+        args.project_id.lower(),
         args.dataset_id,
         args.table_name,
         args.schema_file,
